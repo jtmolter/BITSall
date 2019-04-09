@@ -24,10 +24,10 @@ const bool USEGPS = false;
 #define SBD_BAUD 19200
 
 //Xbee Stuff
-const uint32_t TardisSL = 0x417B4A3B;
 const uint32_t MarsSL = 0x417B4A3B;
+const uint32_t TardisSL = 0x417B4A3A;
 const uint32_t GroundSL = 0x417B4A36;
-const uint32_t UniSH = 0x0013A200;//Dont Touch this one
+const uint32_t UniSH = 0x0013A200;
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
 XBeeAddress64 TardisAddress = XBeeAddress64(UniSH, TardisSL);//SH,SL
@@ -35,8 +35,10 @@ XBeeAddress64 MarsAddress = XBeeAddress64(UniSH, MarsSL);
 XBeeAddress64 GroundAddress = XBeeAddress64(UniSH, GroundSL);
 ZBTxStatusResponse txStatus = ZBTxStatusResponse();
 ZBRxResponse rx = ZBRxResponse();
-uint8_t xbeeBuf[250];//Could be bigger
-uint8_t xbeeBuf2[49];
+const int xbeeRecBufSize = 50; //Rec must be ~15bytes larger than send
+const int xbeeSendBufSize = 35;
+uint8_t xbeeRecBuf[xbeeRecBufSize];
+uint8_t xbeeSendBuf[xbeeSendBufSize];
 
 struct GPSdata{
   float GPSLat=0;

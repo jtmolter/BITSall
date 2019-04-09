@@ -1,16 +1,22 @@
-bool xbeeSend(XBeeAddress64 addr64,uint8_t* payload){
-  ZBTxRequest zbTx = ZBTxRequest(addr64, payload, sizeof(payload)); //Assembles Packe
-  xbee.send(zbTx);                                                  //Sends packet
+bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
+  XBeeAddress64 TargetAddress = XBeeAddress64(UniSH,TargetSL);
+  ZBTxRequest zbTx = ZBTxRequest(TargetAddress, payload, xbeeSendBufSize); //Assembles Packe
+  xbee.send(zbTx);              //Sends packet
+  memset(xbeeSendBuf, 0, xbeeSendBufSize);
   if (xbee.readPacket(500)) {                                       //Checks Reception
     if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
       xbee.getResponse().getZBTxStatusResponse(txStatus);
       if (txStatus.getDeliveryStatus() == SUCCESS) {
-        logprintln("SuccessXbeeTransmit");
+        Serial.println("SuccessfulTransmit");
         return true;
       } else {
-        //MissionFail
+        Serial.println("TxFail");
+        return false;
       }
     }
+  } else if (xbee.getResponse().isError()) {
+    Serial.print("Error reading packet.  Error code: ");
+    Serial.println(xbee.getResponse().getErrorCode());
   }
   return false;
 }
@@ -20,47 +26,47 @@ void xbeeRead(){
     if (xbee.getResponse().isAvailable()) { //got something
       if (xbee.getResponse().getApiId() == ZB_RX_RESPONSE) { //got a TxRequestPacket
         xbee.getResponse().getZBRxResponse(rx);
-        
         uint32_t incominglsb = rx.getRemoteAddress64().getLsb();
-        logprint("ReceivedXbeePacketFrom");
+        logprint("IncPckFrom ");
         logprintln32(incominglsb);
-        Serial.print("Incoming Packet From: ");
-        Serial.println(incominglsb,HEX);
-        int incomingLength = rx.getPacketLength();
-        memset(xbeeBuf, 0, 250); // Clears old buffer
-        memcpy(xbeeBuf,rx.getData(),rx.getPacketLength());
+        if(rx.getPacketLength()>=xbeeRecBufSize){
+          logprint("Oversized Message: ");
+          logprintln(rx.getPacketLength());
+        }
+        memset(xbeeRecBuf, 0, xbeeRecBufSize); // Clears old buffer
+        memcpy(xbeeRecBuf,rx.getData(),rx.getPacketLength());
         if(incominglsb == TardisSL){
           processTardisMessage();
-        }else if(incominglsb == MarsSL){
+        }
+        if(incominglsb == MarsSL){
           processMarsMessage();
-        }else if(incominglsb == GroundSL){
+        }
+        if(incominglsb == GroundSL){
           processGroundMessage();
         }    
       }
-    } else if (xbee.getResponse().isError()) {
-      Serial.print("error code:");
-      Serial.println(xbee.getResponse().getErrorCode());
-    }
+    } 
 }
 
 void processTardisMessage(){
-  if(strstr((char*)xbeeBuf,"pleasedrop")){
-        OutputSerial.println("TardisDropRequest");
-        logprintln("TardisDropRequest");
-  }else if(strstr((char*)xbeeBuf,"holdme")){
-        OutputSerial.println("TardisHoldRequest");
-        logprintln("TardisHoldRequest");
+  if(strstr((char*)xbeeRecBuf,"pleasedrop")){
+      OutputSerial.println("TardisDropRequest");
+      logprintln("TardisDropRequest");
+  }else if(strstr((char*)xbeeRecBuf,"holdme")){
+      OutputSerial.println("TardisHoldRequest");
+      logprintln("TardisHoldRequest");
   }
 }
 void processMarsMessage(){
   
 }
+
 void processGroundMessage(){
   Serial.println("GroundMSG");
-  if(strstr((char*)xbeeBuf,"test")){
-        OutputSerial.println("things");
-        logprintln("things");
-        String("test").getBytes(xbeeBuf2,49);
-    xbeeSend(GroundAddress,xbeeBuf2);
+  if(strstr((char*)xbeeRecBuf,"test")){
+      OutputSerial.println("things");
+      logprintln("things");
+      String("test").getBytes(xbeeSendBuf,xbeeSendBufSize);
+      xbeeSend(GroundAddress,xbeeSendBuf);
   }
 }
