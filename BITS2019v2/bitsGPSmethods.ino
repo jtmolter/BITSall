@@ -19,21 +19,19 @@ const char hexList[] PROGMEM = {
 };
 
 void GPSINIT(){
-  pinMode(6,OUTPUT); //GPS transistor pin
-  digitalWrite(6,HIGH);
-  delay(1000);
+  //pinMode(6,OUTPUT); //GPS transistor pin
+  //digitalWrite(6,HIGH);
+  //delay(1000);
 	for(int i = 0;i<sizeof(hexList);i++){
-		GpsSerial.write(pgm_read_byte(hexList+i));
+		Serial3.write(pgm_read_byte(hexList+i));
 		delay(10);
 	}
 }
 
 GPSdata getGPS(){
   GPSdata gpsInfo;
-  //unsigned long chars; DELETEonTEST
-  //unsigned short sentences, failed; DELETEonTEST
-  // For one second we parse GPS data and report some key values
-  //unsigned long start = millis(); DELETEonTEST
+  unsigned long chars;
+  unsigned short sentences, failed;
   
     float GPSLat, GPSLon;
     int GPSSats;
@@ -43,22 +41,23 @@ GPSdata getGPS(){
     GPSSats = gps.satellites();
     gps.get_datetime(&date, &GPSTime, &fix_age);
     GPSAlt = gps.altitude()/100.;
+
     gpsInfo.GPSLat = GPSLat;
     gpsInfo.GPSLon = GPSLon;
     gpsInfo.GPSTime = GPSTime/100;
     gpsInfo.GPSSats = GPSSats;
     gpsInfo.GPSAlt = GPSAlt;
+  
   return gpsInfo;
 }
-/**
-void output(){   //TEST output, don't delete
+
+void output(){
   String gpspacket;
   if(gpsInfo.GPSSats!=-1){
     gpspacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,6) + "," + String(gpsInfo.GPSLon,6)+","+gpsInfo.GPSAlt+","+gpsInfo.GPSSats;
   }else{
     //gpspacket = String(preserve.GPSTime/100)+","+String(preserve.GPSLat,6) + "," + String(preserve.GPSLon,6)+","+preserve.GPSAlt+","+preserve.GPSSats;
-    gpspacket = "err" + String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,6) + "," + String(gpsInfo.GPSLon,6)+","+gpsInfo.GPSAlt+","+gpsInfo.GPSSats;
+    gpspacket = "err" + String(gpsInfo.GPSTime/100)+","+String(gpsInfo.GPSLat,6) + "," + String(gpsInfo.GPSLon,6)+","+gpsInfo.GPSAlt+","+gpsInfo.GPSSats;
   }
   Serial.println(gpspacket);
 }
-*/

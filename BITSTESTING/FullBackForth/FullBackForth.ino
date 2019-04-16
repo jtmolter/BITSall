@@ -3,13 +3,13 @@
 
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
-SoftwareSerial xbeeSerial(2, 3);
-//#define xbeeSerial Serial2
+//SoftwareSerial xbeeSerial(2, 3);
+#define xbeeSerial Serial2
 
 
 const uint32_t BitsSL = 0x417B4A3B;
-const uint32_t MarsSL = 0x417B4A3A;
 const uint32_t GroundSL = 0x417B4A36;
+const uint32_t MarsSL = 0x417B4A3A;
 const uint32_t UniSH = 0x0013A200;
 
 ZBTxStatusResponse txStatus = ZBTxStatusResponse();
@@ -32,7 +32,7 @@ void loop() {
   if(Serial.available()>0){
     Serial.print("Sending: ");
     Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize);
-    xbeeSend(BitsSL,xbeeSendBuf);
+    xbeeSend(GroundSL,xbeeSendBuf);
     //Serial.write(xbeeSendBuf,25);
     //Serial.println("");
   }
@@ -43,8 +43,8 @@ void loop() {
 bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
   XBeeAddress64 TargetAddress = XBeeAddress64(UniSH,TargetSL);
   ZBTxRequest zbTx = ZBTxRequest(TargetAddress, payload, xbeeSendBufSize); //Assembles Packe
-  xbee.send(zbTx);//Sends packet
-  memset(xbeeSendBuf, 0, xbeeSendBufSize);  
+  xbee.send(zbTx);              //Sends packet
+  memset(xbeeSendBuf, 0, xbeeSendBufSize);
   if (xbee.readPacket(500)) {                                       //Checks Reception
     if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
       xbee.getResponse().getZBTxStatusResponse(txStatus);
@@ -60,7 +60,6 @@ bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
     Serial.print("Error reading packet.  Error code: ");
     Serial.println(xbee.getResponse().getErrorCode());
   }
-  
   return false;
 }
 
@@ -102,7 +101,9 @@ void processBitsMessage(){
   Serial.println(""); 
 }
 void processGroundMessage(){
-  Serial.println("RecFromGND");  
+  Serial.println("RecFromGND");
+  Serial.write(xbeeRecBuf,xbeeRecBufSize); 
+  Serial.println("");  
 }
 void processMarsMessage(){
   Serial.println("RecFromGND");  

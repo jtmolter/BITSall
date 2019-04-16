@@ -87,7 +87,10 @@ void xbeeRead(){
 
 void processBitsMessage(){
   Serial.println("RecFromBits");
+  Serial.write(xbeeRecBuf,xbeeRecBufSize);
+  Serial.println("");
 }
+/**
 void processGroundMessage(){
   Serial.print("RecFromGND: ");
   Serial.write(xbeeRecBuf,xbeeRecBufSize);
@@ -104,7 +107,9 @@ void processGroundMessage(){
       String("ToGNDAck").getBytes(xbeeSendBuf,xbeeSendBufSize);
       xbeeSend(GroundSL,xbeeSendBuf);
   }  
-}
+}*/
 void processHeliosMessage(){
-  Serial.println("RecFromGND");  
+  Serial.println("RecFromHelios");
+  Serial.write(xbeeRecBuf,xbeeRecBufSize);
+  Serial.println("");
 }

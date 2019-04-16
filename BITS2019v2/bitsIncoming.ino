@@ -40,4 +40,10 @@ void uplink(){
           messageTimeInterval = 900000; //15 minutes
         }
     }
+    if(strstr((char*)rxBuf,"xbeetest")){
+        OutputSerial.println("PingXbee");
+        logprintln("PingXbee");
+        String("TestCommand").getBytes(xbeeSendBuf,xbeeSendBufSize);
+        xbeeSend(GroundSL,xbeeSendBuf);
+    }
 }

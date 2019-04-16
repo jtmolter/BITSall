@@ -11,12 +11,12 @@
 #define OutputSerial Serial
 #define IridiumSerial Serial1
 #define XBeeSerial Serial2
-#define GpsSerial Serial3
+
 
 //
 #define DIAGNOSTICS false // Change this to see diagnostics
-const bool USEGPS = false;
-#define SLEEP_PIN_NO 7
+const bool USEGPS = true;
+#define SLEEP_PIN_NO 5
 #define SBD_RX_BUFFER_SIZE 270 // Max size of an SBD message
 
 //Setting default datarates
@@ -24,27 +24,26 @@ const bool USEGPS = false;
 #define SBD_BAUD 19200
 
 //Xbee Stuff
-const uint32_t MarsSL = 0x417B4A3B;
-const uint32_t TardisSL = 0x417B4A3A;
+const uint32_t BitsSL = 0x417B4A3B;
 const uint32_t GroundSL = 0x417B4A36;
+const uint32_t HeliosSL = 0x417B4A3A;
 const uint32_t UniSH = 0x0013A200;
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
-XBeeAddress64 TardisAddress = XBeeAddress64(UniSH, TardisSL);//SH,SL
-XBeeAddress64 MarsAddress = XBeeAddress64(UniSH, MarsSL);
-XBeeAddress64 GroundAddress = XBeeAddress64(UniSH, GroundSL);
+
 ZBTxStatusResponse txStatus = ZBTxStatusResponse();
 ZBRxResponse rx = ZBRxResponse();
-const int xbeeRecBufSize = 50; //Rec must be ~15bytes larger than send
-const int xbeeSendBufSize = 35;
+ModemStatusResponse msr = ModemStatusResponse();
+const int xbeeRecBufSize = 49; //Rec must be ~15bytes larger than send
+const int xbeeSendBufSize = 34;
 uint8_t xbeeRecBuf[xbeeRecBufSize];
 uint8_t xbeeSendBuf[xbeeSendBufSize];
 
 struct GPSdata{
-  float GPSLat=0;
-  float GPSLon=0;
-  unsigned long GPSTime=0;
-  long GPSAlt=0;
+  float GPSLat=2;
+  float GPSLon=2;
+  unsigned long GPSTime=2;
+  long GPSAlt=-1;
   int GPSSats=-1;
 };
 TinyGPS gps;
@@ -65,7 +64,6 @@ const String eventLogName = "EVENT.LOG";//Events Iridium/XBee
 const String rxLogName =    "RX.LOG";   //Iridium Uplinks   (toBalloon)
 const String txLogName =    "TX.LOG";   //Iridium Downlinks (toGround)
 
-// DO NOT CHANGE THESE ... whoops (sorry Luke)
 const int chipSelect = 4; // Pin for SPI
 
 unsigned long startTime; // The start time of the program
@@ -78,6 +76,7 @@ char sbd_buf[49];//TX BUFFER
 uint8_t rxBuf[49];//RX BUFFER
 uint8_t sbd_rx_buf[SBD_RX_BUFFER_SIZE];
 String downlinkMessage;
+char downlinkMessage2[34];
 bool downlinkData;
 
 int arm_status;//armed when = 42
@@ -111,11 +110,11 @@ IridiumSBD modem(IridiumSerial, SLEEP_PIN_NO);
 void setup()
 {
   Serial.begin(9600);
-  GpsSerial.begin(9600);
-  GPSINIT(); //To get the GPS into Airborne mode WIP TODO
+  Serial3.begin(9600);
+  GPSINIT();
+  Serial3.end();
+  Serial3.begin(9600);//To get the GPS into Airborne mode WIP TODO
   IridiumSerial.begin(SBD_BAUD);
-  //XBeeSerial.begin(9600);
-  //xbee.setSerial(XBeeSerial);
   Serial2.begin(9600);
   xbee.setSerial(Serial2);
   startBlinks();
@@ -135,11 +134,7 @@ void setup()
   Serial.println("MadeLogs");
   logprintln("INIT_LOG_LOG");
 
-//Nuke the Buffer
-  for (int k = 0; k < SBD_RX_BUFFER_SIZE; k++) //Probably useless TODO
-  {
-    sbd_rx_buf[k] = 0;
-  }
+  memset(sbd_rx_buf, 0, SBD_RX_BUFFER_SIZE);
   int err;
 
 #ifdef SBD  // Begin satellite modem operation
@@ -195,17 +190,18 @@ if(USEGPS){
 //GPS LOCK INIT
     while((gpsInfo.GPSAlt<=0)||(gpsInfo.GPSAlt>100000))
     {
-      delay(1);
-      //output();
-      while (GpsSerial.available()){
-        if (gps.encode(GpsSerial.read())){
+      delay(500);
+      output();
+      while (Serial3.available()){
+          if (gps.encode(Serial3.read())){
           gpsInfo = getGPS();
-          break;
+        break;
         }
-      }    
+      }
     }
     gpsPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
     txLogFile.println(gpsPacket);
+    logprintln("GotLock");
     OutputSerial.println("gpsPacket  " +String(gpsPacket));
 }else{
   OutputSerial.println("Not Using GPS");
@@ -238,6 +234,7 @@ void loop()
   ISBDCallback();
 
   xbeeRead();
+  LogPacket();
   
 //Check Signal Quality
   if (((millis() - lastSignalCheck) > signalCheckInterval) && (millis() < shutdownTimeInterval)) {
@@ -268,20 +265,25 @@ void loop()
 
     //String timeString = String(gps_hour)+":"+String(gps_min)+":"+String(gps_sec);
     String Packet = String(gpsInfo.GPSTime) + ","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
+    char Packet2[128];
+    snprintf(Packet2,128,"%u,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt);
     if(downlinkData){
       Packet = Packet + "," + downlinkMessage;
+      strcat(Packet2,downlinkMessage2);
       downlinkData = false;
       downlinkMessage = "";
+      memset(downlinkMessage2, 0, 34);
     }    
     
     logprint(Packet);logprintln("Loop Sending");
     OutputSerial.println("Loop Sending");
-    txLogFile.println(Packet);
+    //txLogFile.println(Packet);
+    txLogFile.println(Packet2);
     txLogFile.flush();
     
-    Packet.toCharArray(sbd_buf,49);
-
-    uint8_t sbd_err = modem.sendReceiveSBDText(sbd_buf,rxBuf,bufferSize); //SEND/RECEIVE
+    //Packet.toCharArray(sbd_buf,49);
+    //uint8_t sbd_err = modem.sendReceiveSBDText(sbd_buf,rxBuf,bufferSize); //SEND/RECEIVE
+    uint8_t sbd_err = modem.sendReceiveSBDText(Packet2,rxBuf,bufferSize); //SEND/RECEIVE
 
     logprint("SBD send receive completed with return code: ");
     logprintln(sbd_err);
@@ -312,8 +314,8 @@ void loop()
 bool ISBDCallback()
 {
   //Parse the GPS without delay
-  while (GpsSerial.available()){
-    if (gps.encode(GpsSerial.read())){
+  while (Serial3.available()){
+    if (gps.encode(Serial3.read())){
       gpsInfo = getGPS();
       break;
     }
@@ -322,27 +324,8 @@ bool ISBDCallback()
   //Check the Xbee
   xbeeRead();
   
-  if(millis()-lastLog>1000){
-    //String gpsLogPacket;
-    //gpsLogPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
-    //gpsLogFile.println(gpsLogPacket);
-
-    //TESTTHIS
-    char LogPacket[49];
-    char buffery[10];
-    itoa(gpsInfo.GPSTime,buffery,10);
-    strcpy(LogPacket,buffery);
-    itoa(gpsInfo.GPSLat,buffery,10);
-    strcat(LogPacket,buffery);
-    itoa(gpsInfo.GPSLon,buffery,10);
-    strcat(LogPacket,buffery);
-    itoa(gpsInfo.GPSAlt,buffery,10);
-    strcat(LogPacket,buffery);
-    gpsLogFile.println(LogPacket);
-    
-    gpsLogFile.flush();
-    lastLog=millis();
-  }
+  LogPacket();
+  
   return true;
 }
 
@@ -406,3 +389,28 @@ void ISBDDiagsCallback(IridiumSBD *device, char c)
   OutputSerial.write(c);
 }
 #endif
+
+void LogPacket(){
+  if(millis()-lastLog>1000){
+    String gpsLogPacket;
+    gpsLogPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
+    gpsLogFile.println(gpsLogPacket);
+
+    //TESTTHIS- WIP
+    /**
+    char LogPacket[49];
+    char buffery[10];
+    itoa(gpsInfo.GPSTime,buffery,10);
+    strcpy(LogPacket,buffery);
+    itoa(gpsInfo.GPSLat,buffery,10);
+    strcat(LogPacket,buffery);
+    itoa(gpsInfo.GPSLon,buffery,10);
+    strcat(LogPacket,buffery);
+    itoa(gpsInfo.GPSAlt,buffery,10);
+    strcat(LogPacket,buffery);
+    gpsLogFile.println(LogPacket);
+    */
+    gpsLogFile.flush();
+    lastLog=millis();
+  }
+}
