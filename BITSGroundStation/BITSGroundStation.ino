@@ -29,9 +29,11 @@ void setup() {
 
 void loop() {
   if(Serial.available()>0){
-    Serial.println("Sending");
+    Serial.print("Sending: ");
     Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize);
-    xbeeSend(BitsSL,xbeeSendBuf);
+    Serial.write(xbeeSendBuf,xbeeSendBufSize);
+    Serial.println("");
+    xbeeSend(HeliosSL,xbeeSendBuf);
   }
   
   xbeeRead();

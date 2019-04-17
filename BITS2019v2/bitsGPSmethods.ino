@@ -23,15 +23,15 @@ void GPSINIT(){
   //digitalWrite(6,HIGH);
   //delay(1000);
 	for(int i = 0;i<sizeof(hexList);i++){
-		Serial3.write(pgm_read_byte(hexList+i));
+		gpsserial.write(pgm_read_byte(hexList+i));
 		delay(10);
 	}
 }
 
 GPSdata getGPS(){
   GPSdata gpsInfo;
-  unsigned long chars;
-  unsigned short sentences, failed;
+  //unsigned long chars; //TESTTHIS
+  //unsigned short sentences, failed;
   
     float GPSLat, GPSLon;
     int GPSSats;

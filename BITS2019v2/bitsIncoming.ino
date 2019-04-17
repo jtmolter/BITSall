@@ -46,4 +46,12 @@ void uplink(){
         String("TestCommand").getBytes(xbeeSendBuf,xbeeSendBufSize);
         xbeeSend(GroundSL,xbeeSendBuf);
     }
+    if(strstr((char*)rxBuf,"HELIOS")){
+      OutputSerial.println("HELIOS");
+      logprintln("HELIOS");
+      strcpy((char*)xbeeSendBuf,(char*)rxBuf);
+      xbeeSend(HeliosSL,xbeeSendBuf);
+      downlinkData = true;
+      downlinkMessage2[0] = 'c';
+    }
 }
