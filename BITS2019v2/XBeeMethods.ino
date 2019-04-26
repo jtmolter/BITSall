@@ -48,6 +48,13 @@ void xbeeRead(){
 void processHeliosMessage(){
   OutputSerial.println("RecHelios");
   logprintln("RecHelios");
+  if(strstr((char*)xbeeRecBuf,"TG")){
+      OutputSerial.println("TGhelios");
+      logprintln("TGhelios");
+      downlinkData = true;
+      //strcat(downlinkMessage2,(char*)xbeeRecBuf);
+      strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
+  }
 }
 
 void processGroundMessage(){
@@ -60,18 +67,11 @@ void processGroundMessage(){
   }
   if(strstr((char*)xbeeRecBuf,"TG")){
       OutputSerial.println("TG");
-      logprintln("TG");
-      String("TGtestConf").getBytes(xbeeSendBuf,xbeeSendBufSize);
+      logprintln("TGgnd");
+      String("TGgndReq").getBytes(xbeeSendBuf,xbeeSendBufSize);
       xbeeSend(GroundSL,xbeeSendBuf);
       downlinkData = true;
-      downlinkMessage = "TGtest";
-  }
-  if(strstr((char*)xbeeRecBuf,"DT")){
-      OutputSerial.println("DT");
-      logprintln("DT");
-      String("DTtestConf").getBytes(xbeeSendBuf,xbeeSendBufSize);
-      xbeeSend(GroundSL,xbeeSendBuf);
-      downlinkData = true;
-      strcpy(downlinkMessage2,(char*)xbeeRecBuf);
+      //strcat(downlinkMessage2,(char*)xbeeRecBuf);
+      strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
   }
 }

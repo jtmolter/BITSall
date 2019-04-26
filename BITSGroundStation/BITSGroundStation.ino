@@ -25,16 +25,32 @@ void setup() {
   delay(500);
   xbee.setSerial(xbeeSerial);
   Serial.println("Startup");
+  Serial.println("Enter Message Target (1 BITS, 2 Helios)");
 }
 
 void loop() {
   if(Serial.available()>0){
-    Serial.print("Sending: ");
-    Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize);
-    Serial.write(xbeeSendBuf,xbeeSendBufSize);
-    Serial.println("");
-    xbeeSend(HeliosSL,xbeeSendBuf);
+      if(Serial.read()=='1'){
+        Serial.println("ToBits");
+        while(!Serial.available()){}
+        if(Serial.available()>0){
+          Serial.print("Sending: ");
+          Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize);
+          Serial.write(xbeeSendBuf,xbeeSendBufSize);
+          xbeeSend(BitsSL,xbeeSendBuf);
+        }
+      }else if(Serial.read()=='2'){
+        Serial.println("ToHelios");
+        while(!Serial.available()){}
+        if(Serial.available()>0){
+          Serial.print("Sending: ");
+          Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize);
+          Serial.write(xbeeSendBuf,xbeeSendBufSize);
+          xbeeSend(HeliosSL,xbeeSendBuf);
+        }
+      }
   }
+  
   
   xbeeRead();
 }
@@ -49,11 +65,13 @@ bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
       xbee.getResponse().getZBTxStatusResponse(txStatus);
       if (txStatus.getDeliveryStatus() == SUCCESS) {
         Serial.println("SuccessfulTransmit");
+        Serial.println("Enter Message Target (1 BITS, 2 Helios)");
         return true;
       } else {
         Serial.println("TxFail");
+        Serial.println("Enter Message Target (1 BITS, 2 Helios)");
         return false;
-      }
+      } 
     }
   } else if (xbee.getResponse().isError()) {
     Serial.print("Error reading packet.  Error code: ");

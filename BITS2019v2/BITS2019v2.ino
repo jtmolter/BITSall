@@ -17,6 +17,8 @@
 const bool USEGPS = true;
 #define SLEEP_PIN_NO 5
 #define SBD_RX_BUFFER_SIZE 270 // Max size of an SBD message
+#define maxPacketSize 128
+#define downlinkMessageSize 98
 
 //Setting default datarates
 #define GPS_BAUD 9600
@@ -54,7 +56,7 @@ File rxLogFile;
 File txLogFile;
 
 const long signalCheckInterval = 15000;
-long messageTimeInterval = 60000; // In milliseconds; 300000 is 5 minutes; defines how frequently the program sends messages, now changeable                                                                      
+unsigned long messageTimeInterval = 60000; // In milliseconds; 300000 is 5 minutes; defines how frequently the program sends messages, now changeable                                                                      
 const long shutdownTimeInterval = 14400000; // In milliseconds; 14400000 is 4 hours; defines after what period of time the program stops sending messages
 
 // LogFiles, Must be in form XXXXXXXX.log; no more than 8 'X' characters
@@ -71,26 +73,18 @@ unsigned long lastSignalCheck = 0;
 unsigned long lastLog = 0;
 
 bool sendingMessages = true; // Whether or not the device is sending messages; begins as true TODO
-char sbd_buf[49];//TX BUFFER
 uint8_t rxBuf[49];//RX BUFFER
 uint8_t sbd_rx_buf[SBD_RX_BUFFER_SIZE];
-String downlinkMessage;
-char downlinkMessage2[34];
+
+char downlinkMessage2[downlinkMessageSize] = {};
 bool downlinkData;
+
+int sbd_csq;
 
 int arm_status;//armed when = 42
 
-uint8_t gps_hour;
-uint8_t gps_min;
-uint8_t gps_sec;
-double gps_lat;
-double gps_lng;
-unsigned int gps_alt;
-double gps_hdop;
-int sbd_csq;
-
 // Declare the IridiumSBD object
-IridiumSBD modem(IridiumSerial, SLEEP_PIN_NO);
+IridiumSBD modem(IridiumSerial);
 
 #define ISBD_SUCCESS             0
 #define ISBD_ALREADY_AWAKE       1
@@ -139,6 +133,7 @@ void setup()
 #ifdef SBD  // Begin satellite modem operation
   OutputSerial.println("Starting modem...");
   err = modem.begin();
+  isbd.useMSSTMWorkaround(false);//SUPER NF TESTTHIS TODO
   if (err != ISBD_SUCCESS)
   {
     OutputSerial.print("Begin failed: error ");
@@ -209,6 +204,7 @@ if(USEGPS){
 
 #ifdef SBD
 // Send the message
+  char sbd_buf[49];//TX BUFFER
   OutputSerial.print("Trying to send the message.  This might take several minutes.\r\n");
   gpsPacket.toCharArray(sbd_buf,49);
   err = modem.sendSBDText(sbd_buf);//Sends an initial packet AFTER gps has locked.
@@ -255,19 +251,16 @@ void loop()
 //Transmit Via Iridium
   if ((sbd_csq > 0 && (millis() - lastMillisOfMessage) > messageTimeInterval) && (millis() < shutdownTimeInterval) && sendingMessages) {
 
-    //String logString = "";logString += String(gpsInfo.GPSTime);logString += "\t";DELETE TEST
-
     uint32_t gps_time = gpsInfo.GPSTime;
     size_t rx_buf_size = sizeof(sbd_rx_buf); //TODO
-    size_t bufferSize = sizeof(rxBuf);
-
-    char Packet2[128];
-    snprintf(Packet2,128,"%u,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt);
+    
+    char Packet2[maxPacketSize];
+    snprintf(Packet2,maxPacketSize,"%u,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt);
     if(downlinkData){
-      strcat(Packet2,downlinkMessage2);
+      //strcat(Packet2,downlinkMessage2);
+      strncat(Packet2,downlinkMessage2,maxPacketSize - strlen(Packet2) - 1);
       downlinkData = false;
-      downlinkMessage = "";
-      memset(downlinkMessage2, 0, 34);
+      memset(downlinkMessage2, 0, downlinkMessageSize);
     }    
     
     logprint(Packet2);logprintln("Loop Sending");
@@ -275,7 +268,7 @@ void loop()
     txLogFile.println(Packet2);
     txLogFile.flush();
     
-    uint8_t sbd_err = modem.sendReceiveSBDText(Packet2,rxBuf,bufferSize); //SEND/RECEIVE
+    uint8_t sbd_err = modem.sendReceiveSBDText(Packet2,rxBuf,rx_buf_size); //SEND/RECEIVE
 
     logprint("SBD send receive completed with return code: ");
     logprintln(sbd_err);
@@ -283,13 +276,11 @@ void loop()
 
     rxLogFile.print(String(gpsInfo.GPSTime));
     rxLogFile.print("\t");
-    rxLogFile.print(rx_buf_size);
-    rxLogFile.print("\t");
-
+    
 //Uplink
     uplink();
  
-    for (int k = 0; k < bufferSize; k++)//Prints RX characters to SD file
+    for (int k = 0; k < rx_buf_size; k++)//Prints RX characters to SD file
     {
       rxLogFile.print(rxBuf[k]);
       rxBuf[k] = 0;
@@ -384,27 +375,10 @@ void ISBDDiagsCallback(IridiumSBD *device, char c)
 
 void LogPacket(){
   if(millis()-lastLog>1000){
-    //String gpsLogPacket;
-    //gpsLogPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
-    //gpsLogFile.println(gpsLogPacket);
-
     char gpsLogPacket2[35];
     snprintf(gpsLogPacket2,35,"%u,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt);
     gpsLogFile.println(gpsLogPacket2);
-    //TESTTHIS- WIP
-    /**
-    char LogPacket[49];
-    char buffery[10];
-    itoa(gpsInfo.GPSTime,buffery,10);
-    strcpy(LogPacket,buffery);
-    itoa(gpsInfo.GPSLat,buffery,10);
-    strcat(LogPacket,buffery);
-    itoa(gpsInfo.GPSLon,buffery,10);
-    strcat(LogPacket,buffery);
-    itoa(gpsInfo.GPSAlt,buffery,10);
-    strcat(LogPacket,buffery);
-    gpsLogFile.println(LogPacket);
-    */
+    
     gpsLogFile.flush();
     lastLog=millis();
   }

@@ -23,7 +23,7 @@ void uplink(){
         OutputSerial.println("TEST_SUCCESS");
         logprintln("TEST_PASS");
         downlinkData = true;
-        downlinkMessage = "GO";
+        strcat(downlinkMessage2,"pass");
     }else if(strstr((char*)rxBuf,"setrate")){ //Change SBD message frequency
         if(strstr((char*)rxBuf,"fast")){      //For testing / accurate drops
           OutputSerial.println("SET_RATE_FAST");
@@ -49,9 +49,9 @@ void uplink(){
     if(strstr((char*)rxBuf,"HELIOS")){
       OutputSerial.println("HELIOS");
       logprintln("HELIOS");
-      strcpy((char*)xbeeSendBuf,(char*)rxBuf);
+      strcat((char*)xbeeSendBuf,(char*)rxBuf);
       xbeeSend(HeliosSL,xbeeSendBuf);
       downlinkData = true;
-      downlinkMessage2[0] = 'c';
+      strcat(downlinkMessage2,"conf");
     }
 }
