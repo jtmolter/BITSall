@@ -40,8 +40,8 @@ void loop() {
         while(!Serial.available()){}
         if(Serial.available()>0){
           Serial.print("Sending: ");
-          Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize);
-          Serial.write(xbeeSendBuf,xbeeSendBufSize);
+          Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize); //Read bytes in over serial
+          Serial.write(xbeeSendBuf,xbeeSendBufSize);            //Display what you've attempted to send
           xbeeSend(BitsSL,xbeeSendBuf);
         }
       }else if(Serial.read()=='2'){
@@ -49,8 +49,8 @@ void loop() {
         while(!Serial.available()){}
         if(Serial.available()>0){
           Serial.print("Sending: ");
-          Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize);
-          Serial.write(xbeeSendBuf,xbeeSendBufSize);
+          Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize); //Read bytes in over serial
+          Serial.write(xbeeSendBuf,xbeeSendBufSize);            //Display what you've attempted to send
           xbeeSend(HeliosSL,xbeeSendBuf);
         }
       }
