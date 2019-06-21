@@ -15,7 +15,7 @@
 
 #define DIAGNOSTICS false // Change this to see diagnostics
 const bool USEGPS = true;
-#define SLEEP_PIN_NO 5
+//#define SLEEP_PIN_NO 5
 #define SBD_RX_BUFFER_SIZE 270 // Max size of an SBD message
 #define maxPacketSize 128
 #define downlinkMessageSize 98
@@ -65,7 +65,7 @@ const String eventLogName = "EVENT.LOG";//Events Iridium/XBee
 const String rxLogName =    "RX.LOG";   //Iridium Uplinks   (toBalloon)
 const String txLogName =    "TX.LOG";   //Iridium Downlinks (toGround)
 
-const int chipSelect = 4; // Pin for SPI
+const int chipSelect = 3; // Pin for SPI
 
 unsigned long startTime; // The start time of the program
 unsigned long lastMillisOfMessage = 0;
@@ -103,8 +103,6 @@ IridiumSBD modem(IridiumSerial);
 void setup()
 {
   Serial.begin(9600);
-  delay(5);
-  Serial.println("BITS2019v2");
   gpsserial.begin(9600);
   GPSINIT();
   gpsserial.end();
@@ -113,11 +111,13 @@ void setup()
   Serial2.begin(9600);
   xbee.setSerial(Serial2);
   startBlinks();
-
+  delay(5);
 //Open Files
   SD.begin(chipSelect);
   gpsLogFile = SD.open(gpsLogName, FILE_WRITE);
+  delay(5);
   rxLogFile = SD.open(rxLogName, FILE_WRITE);
+  delay(5);
   txLogFile = SD.open(txLogName, FILE_WRITE);
   delay(10);
   gpsLogFile.println("INIT_GPS_LOG");
@@ -199,7 +199,6 @@ if(USEGPS){
     gpsPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
     txLogFile.println(gpsPacket);
     logprintln("GotLock");
-    gpsLockBlink();
     OutputSerial.println("gpsPacket  " +String(gpsPacket));
 }else{
   OutputSerial.println("Not Using GPS");

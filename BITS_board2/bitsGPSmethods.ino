@@ -60,5 +60,4 @@ void output(){
     gpspacket = "err" + String(gpsInfo.GPSTime/100)+","+String(gpsInfo.GPSLat,6) + "," + String(gpsInfo.GPSLon,6)+","+gpsInfo.GPSAlt+","+gpsInfo.GPSSats;
   }
   Serial.println(gpspacket);
-  pulseRed();
 }

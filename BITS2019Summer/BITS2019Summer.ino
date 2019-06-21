@@ -172,7 +172,7 @@ void setup()
     OutputSerial.println(err);
     logprint("SignalQuality failed: error ");
     logprintln(err);
-    sbd_csq = 0;
+    sbd_csq = -1;
     return;
   }
 
@@ -185,6 +185,7 @@ String gpsPacket;
 if(USEGPS){
   OutputSerial.println("TryingGPS");
 //GPS LOCK INIT
+    /**
     while((gpsInfo.GPSAlt<=0)||(gpsInfo.GPSAlt>100000))
     {
       delay(500);
@@ -196,6 +197,7 @@ if(USEGPS){
         }
       }
     }
+    */
     gpsPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
     txLogFile.println(gpsPacket);
     logprintln("GotLock");
