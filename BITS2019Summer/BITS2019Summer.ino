@@ -65,7 +65,7 @@ const String eventLogName = "EVENT.LOG";//Events Iridium/XBee
 const String rxLogName =    "RX.LOG";   //Iridium Uplinks   (toBalloon)
 const String txLogName =    "TX.LOG";   //Iridium Downlinks (toGround)
 
-const int chipSelect = 4; // Pin for SPI
+const int chipSelect = 3; // Pin for SPI //whoops
 
 unsigned long startTime; // The start time of the program
 unsigned long lastMillisOfMessage = 0;
@@ -176,7 +176,7 @@ void setup()
     return;
   }
 
-  OutputSerial.print("On a scale of 0 to 5, signal quality is currently ");
+  OutputSerial.print("From 0 to 5, signal qual is: ");
   OutputSerial.println(sbd_csq);
 #endif
 
@@ -257,13 +257,12 @@ void loop()
 //Transmit Via Iridium
   if ((sbd_csq > 0 && (millis() - lastMillisOfMessage) > messageTimeInterval) && (millis() < shutdownTimeInterval) && sendingMessages) {
 
-    uint32_t gps_time = gpsInfo.GPSTime;
+    //uint32_t gps_time = gpsInfo.GPSTime; Delete
     size_t rx_buf_size = sizeof(sbd_rx_buf); //TODO
     
     char Packet2[maxPacketSize];
-    snprintf(Packet2,maxPacketSize,"%u,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt); //Build the packet
+    snprintf(Packet2,maxPacketSize,"%06d,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt); //Build the packet
     if(downlinkData){ //If there is stuff to downlink than do
-      //strcat(Packet2,downlinkMessage2); //dep concat
       strncat(Packet2,downlinkMessage2,maxPacketSize - strlen(Packet2) - 1); // Add downlink packet to main gps packet
       downlinkData = false;
       memset(downlinkMessage2, 0, downlinkMessageSize); //Clear downlink message
@@ -300,7 +299,7 @@ void loop()
 }//End of Loop
 
 
-bool ISBDCallback()
+bool ISBDCallback() //Functions that occurs during packet transmit sequence delay
 {
   //Parse the GPS without delay
   while (gpsserial.available()){
@@ -382,7 +381,16 @@ void ISBDDiagsCallback(IridiumSBD *device, char c)
 void LogPacket(){
   if(millis()-lastLog>1000){
     char gpsLogPacket2[35];
-    snprintf(gpsLogPacket2,35,"%u,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt);
+    
+    char exactTime[9];//A somewhat convaluted way of adding : into the integer timestamp... //TEST
+    snprintf(exactTime,7,"%d",gpsInfo.GPSTime);
+    char hour[3];char min[3];char sec[3];
+    strncpy(hour, &exactTime[0], 2);hour[2] = '\0';
+    strncpy(min, &exactTime[2], 2);min[2] = '\0';
+    strncpy(sec, &exactTime[4], 2);sec[2] = '\0';
+    snprintf(exactTime,9,"%s:%s:%s",hour,min,sec);
+    
+    snprintf(gpsLogPacket2,35,"%06d,%4.4f,%4.4f,%u",exactTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt);
     gpsLogFile.println(gpsLogPacket2);
     
     gpsLogFile.flush();

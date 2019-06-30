@@ -7,7 +7,7 @@ bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
     if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {
       xbee.getResponse().getZBTxStatusResponse(txStatus);
       if (txStatus.getDeliveryStatus() == SUCCESS) {
-        Serial.println("SuccessfulTransmit");
+        Serial.println("GoodTx");
         return true;
       } else {
         Serial.println("TxFail");
@@ -15,7 +15,7 @@ bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
       }
     }
   } else if (xbee.getResponse().isError()) {
-    Serial.print("Error reading packet.  Error code: ");
+    Serial.print("PckErr");
     Serial.println(xbee.getResponse().getErrorCode());
   }
   return false;

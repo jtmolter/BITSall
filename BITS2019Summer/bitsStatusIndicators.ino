@@ -1,3 +1,4 @@
+//Advanced blinking
 void startBlinks(){
 //LED Indicators
   pinMode(4,OUTPUT);//Red
