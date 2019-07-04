@@ -8,13 +8,14 @@
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
 SoftwareSerial xbeeSerial(2, 3);
-//#define xbeeSerial Serial2 //How you would do it if you wanted to use harware serial
+//#define xbeeSerial Serial2 //How you would do it if you wanted to use hardware serial
 
 
-const uint32_t BitsSL = 0x417B4A3B;  //Specific to the XBee on Bits (the Serial Low address value)
-const uint32_t GroundSL = 0x417B4A36;
-const uint32_t HeliosSL = 0x417B4A3A;
-const uint32_t UniSH = 0x0013A200; //Common across any and all XBees
+const uint32_t BitsSL = 0x417B4A3B;   //BITS   (white)Specific to the XBee on Bits (the Serial Low address value)
+const uint32_t GroundSL = 0x417B4A36; //GndStn (u.fl)
+const uint32_t BlueSL = 0x417B4A3A;   //Mars   (blue)
+const uint32_t WireSL = 0x419091AC;   //Tardis (wire antenna)
+const uint32_t UniSH = 0x0013A200;//Common across any and all XBees
 
 ZBTxStatusResponse txStatus = ZBTxStatusResponse(); //What lets the library check if things went through
 ZBRxResponse rx = ZBRxResponse();                   //Similar to above
@@ -25,33 +26,55 @@ uint8_t xbeeRecBuf[xbeeRecBufSize];
 uint8_t xbeeSendBuf[xbeeSendBufSize];
 
 void setup() {
-  Serial.begin(9600);
-  xbeeSerial.begin(9600);
+  Serial.begin(115200);
+  xbeeSerial.begin(38400);
   delay(500);
   xbee.setSerial(xbeeSerial); //Sets which serial the xbee object listens to
   Serial.println("Startup");
-  Serial.println("Enter Message Target (1 BITS, 2 Helios)");
+  Serial.println("Enter Message Target (1 BITS, 2 Mars, 3 Tardis)");
 }
 
 void loop() {
   if(Serial.available()>0){ //Allows someone to send serial commands to the box
-      if(Serial.read()=='1'){
+      char pick = Serial.read();
+      if(pick=='1')
+      {
         Serial.println("ToBits");
+        delay(100);
         while(!Serial.available()){}
         if(Serial.available()>0){
           Serial.print("Sending: ");
           Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize); //Read bytes in over serial
-          Serial.write(xbeeSendBuf,xbeeSendBufSize);            //Display what you've attempted to send
+          Serial.write(xbeeSendBuf,xbeeSendBufSize);
+          Serial.println();
+          //Display what you've attempted to send
           xbeeSend(BitsSL,xbeeSendBuf);
         }
-      }else if(Serial.read()=='2'){
-        Serial.println("ToHelios"); //Really should color code these XBees instead of using payload names
+      }else if(pick=='2')
+      {
+        Serial.println("ToMars"); //Really should color code these XBees instead of using payload names
+        delay(100);
         while(!Serial.available()){}
         if(Serial.available()>0){
           Serial.print("Sending: ");
           Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize); //Read bytes in over serial
-          Serial.write(xbeeSendBuf,xbeeSendBufSize);            //Display what you've attempted to send
-          xbeeSend(HeliosSL,xbeeSendBuf);
+          Serial.write(xbeeSendBuf,xbeeSendBufSize);
+          Serial.println();
+          //Display what you've attempted to send
+          xbeeSend(BlueSL,xbeeSendBuf);
+        }
+      }else if(pick=='3')
+      {
+        Serial.println("ToTardis"); //Really should color code these XBees instead of using payload names
+        delay(100);
+        while(!Serial.available()){}
+        if(Serial.available()>0){
+          Serial.print("Sending: ");
+          Serial.readBytes((char*)xbeeSendBuf,xbeeSendBufSize); //Read bytes in over serial
+          Serial.write(xbeeSendBuf,xbeeSendBufSize);
+          Serial.println();
+          //Display what you've attempted to send
+          xbeeSend(WireSL,xbeeSendBuf);
         }
       }
   }
@@ -65,16 +88,16 @@ bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
   ZBTxRequest zbTx = ZBTxRequest(TargetAddress, payload, xbeeSendBufSize); //Assembles Packet
   xbee.send(zbTx);                                                  //Sends packet
   memset(xbeeSendBuf, 0, xbeeSendBufSize);                          //Nukes buffer
-  if (xbee.readPacket(500)) {                                       //Checks Reception
+  if (xbee.readPacket(50)) {                                       //Checks Reception
     if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {   //If rec
       xbee.getResponse().getZBTxStatusResponse(txStatus);
       if (txStatus.getDeliveryStatus() == SUCCESS) {                //If positive transmit response
         Serial.println("SuccessfulTransmit");
-        Serial.println("Enter Message Target (1 BITS, 2 Helios)");
+        Serial.println("Enter Message Target (1 BITS, 2 MARS, 3 TARDIS)");
         return true;
       } else {
         Serial.println("TxFail");
-        Serial.println("Enter Message Target (1 BITS, 2 Helios)");
+        Serial.println("Enter Message Target (1 BITS, 2 MARS, 3 TARDIS)");
         return false;
       } 
     }
@@ -103,8 +126,11 @@ void xbeeRead(){
         if(incominglsb == BitsSL){ //Seperate methods to handle messages from different senders
           processBitsMessage();    //prevents one payload from having the chance to be mistaken as another
         }
-        if(incominglsb == HeliosSL){
-          processHeliosMessage();
+        if(incominglsb == BlueSL){ //Config for Mars
+          processMarsMessage();
+        }
+        if(incominglsb == WireSL){ //Config for Tardis
+          processTardisMessage();
         }    
       }
     }
@@ -112,6 +138,18 @@ void xbeeRead(){
 
 void processBitsMessage(){ //Just print things to the monitor
   Serial.println("RecFromBits");
+  Serial.write(xbeeRecBuf,xbeeRecBufSize);
+  Serial.println("");
+}
+
+void processMarsMessage(){ //Just print things to the monitor
+  Serial.println("RecFromMars");
+  Serial.write(xbeeRecBuf,xbeeRecBufSize);
+  Serial.println("");
+}
+
+void processTardisMessage(){ //Just print things to the monitor
+  Serial.println("RecFromTardis");
   Serial.write(xbeeRecBuf,xbeeRecBufSize);
   Serial.println("");
 }
@@ -133,8 +171,3 @@ void processGroundMessage(){ //But THIS IS THE GROUND
       xbeeSend(GroundSL,xbeeSendBuf);
   }  
 }*/
-void processHeliosMessage(){ //Just print things to the monitor
-  Serial.println("RecFromHelios");
-  Serial.write(xbeeRecBuf,xbeeRecBufSize);
-  Serial.println("");
-}

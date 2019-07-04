@@ -52,8 +52,9 @@ void processHeliosMessage(){
       OutputSerial.println("TGhelios");
       logprintln("TGhelios");
       downlinkData = true;
-      //strcat(downlinkMessage2,(char*)xbeeRecBuf);
+      //strcat(downlinkMessage2,(char*)xbeeRecBuf);//DELETE on TEST
       strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
+      //concat(   target      ,     source      ,downlink_buffer_size - current_downlink_packet_size) //Prevents payloads from overflowing the downlink and nuking BITS
   }
 }
 
@@ -65,6 +66,7 @@ void processGroundMessage(){
       String("testSendBack").getBytes(xbeeSendBuf,xbeeSendBufSize);
       xbeeSend(GroundSL,xbeeSendBuf);
   }
+  
   if(strstr((char*)xbeeRecBuf,"TG")){
       OutputSerial.println("TG");
       logprintln("TGgnd");

@@ -28,6 +28,7 @@ const bool USEGPS = true;
 const uint32_t BitsSL = 0x417B4A3B;
 const uint32_t GroundSL = 0x417B4A36;
 const uint32_t HeliosSL = 0x417B4A3A;
+const uint32_t PackSL = 0x419091AC;
 const uint32_t UniSH = 0x0013A200;
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
