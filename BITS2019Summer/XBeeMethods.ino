@@ -35,35 +35,48 @@ void xbeeRead(){
         }
         memset(xbeeRecBuf, 0, xbeeRecBufSize); // Clears old buffer
         memcpy(xbeeRecBuf,rx.getData(),rx.getPacketLength());
-        if(incominglsb == HeliosSL){
-          processHeliosMessage();
+        if(incominglsb == BlueSL){
+          processBlueMessage();
         }
-        if(incominglsb == GroundSL){
+        else if(incominglsb == GroundSL){
           processGroundMessage();
+        }
+        else if(incominglsb == WireSL){
+          processWireMessage();
         }    
       }
     } 
 }
 
-void processHeliosMessage(){
-  OutputSerial.println("RecHelios");
-  logprintln("RecHelios");
+// Begin the section with Individual process messages, this will probably become a new tab to avoid confusion
+
+void processBlueMessage(){
+  OutputSerial.println("RecBlue");
+  logprintln("RecBlue");
   if(strstr((char*)xbeeRecBuf,"TG")){
-      OutputSerial.println("TGhelios");
-      logprintln("TGhelios");
+      OutputSerial.println("TG_Blue");
+      logprintln("TG_Blue");
       downlinkData = true;
       //strcat(downlinkMessage2,(char*)xbeeRecBuf);//DELETE on TEST
       strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
+      logprint("BlueDownAppend");
+      logprintln(downlinkMessage2);
       //concat(   target      ,     source      ,downlink_buffer_size - current_downlink_packet_size) //Prevents payloads from overflowing the downlink and nuking BITS
+  }
+  if(strstr((char*)xbeeRecBuf,"ping")){
+      OutputSerial.println("BluePingPong");
+      logprintln("BluePingPong");
+      String("pong").getBytes(xbeeSendBuf,xbeeSendBufSize);
+      xbeeSend(BlueSL,xbeeSendBuf);
   }
 }
 
 void processGroundMessage(){
   OutputSerial.println("RecGround");
-  if(strstr((char*)xbeeRecBuf,"test")){
-      OutputSerial.println("groundxbeetest");
-      logprintln("groundxbeetest");
-      String("testSendBack").getBytes(xbeeSendBuf,xbeeSendBufSize);
+  if(strstr((char*)xbeeRecBuf,"ping")){
+      OutputSerial.println("groundPingPong");
+      logprintln("groundPingPong");
+      String("pong").getBytes(xbeeSendBuf,xbeeSendBufSize);
       xbeeSend(GroundSL,xbeeSendBuf);
   }
   
@@ -75,5 +88,28 @@ void processGroundMessage(){
       downlinkData = true;
       //strcat(downlinkMessage2,(char*)xbeeRecBuf);
       strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
+      logprint("GNDDownAppend");
+      logprintln(downlinkMessage2);
+  }
+}
+
+void processWireMessage(){
+  OutputSerial.println("RecWire");
+  logprintln("RecWire");
+  if(strstr((char*)xbeeRecBuf,"TG")){
+      OutputSerial.println("TG_Wire");
+      logprintln("TG_Wire");
+      downlinkData = true;
+      //strcat(downlinkMessage2,(char*)xbeeRecBuf);//DELETE on TEST
+      strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
+      logprint("WireDownAppend");
+      logprintln(downlinkMessage2);
+      //concat(   target      ,     source      ,downlink_buffer_size - current_downlink_packet_size) //Prevents payloads from overflowing the downlink and nuking BITS
+  }
+  if(strstr((char*)xbeeRecBuf,"ping")){
+      OutputSerial.println("WirePingPong");
+      logprintln("WirePingPong");
+      String("pong").getBytes(xbeeSendBuf,xbeeSendBufSize);
+      xbeeSend(BlueSL,xbeeSendBuf);
   }
 }

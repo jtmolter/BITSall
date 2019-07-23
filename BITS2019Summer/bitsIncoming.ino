@@ -1,30 +1,47 @@
 //Everything related from ground to BITS commands
 void uplink(){
-    if(strstr((char*)rxBuf,"disarm")){
-        pingBlink();
+    //--ARMING SECTION -------------------------------------
+    if(strstr((char*)rxBuf,"disarm"))
+    {
+        //pingBlink();
         arm_status = 0;
         OutputSerial.println("Payload Disarmed");
         logprintln("Payload Disarmed");
-    }else if(strstr((char*)rxBuf,"arm")){
-        pingBlink();
+        downlinkData = true;
+        strcat(downlinkMessage2,"SAFED");
+        
+    }else if(strstr((char*)rxBuf,"arm"))
+    {
+        //pingBlink();
         arm_status = 42;
         OutputSerial.println("Payload Armed");
-        logprintln("Payload Armed");    
-    }else if(strstr((char*)rxBuf,"drop")){
-        pingBlink();
+        logprintln("Payload Armed");
+        downlinkData = true;
+        strcat(downlinkMessage2,"ARMED"); 
+           
+    }else if(strstr((char*)rxBuf,"drop"))
+    {
+        //pingBlink();
         if(arm_status==42){
-          OutputSerial.println("DROP");
+          OutputSerial.println("open");
           logprintln("DROP");
+          String("open").getBytes(xbeeSendBuf,xbeeSendBufSize);
+          xbeeSend(BlueSL,xbeeSendBuf);
         }else{
           logprintln("UNARMED_DROP_ATTEMPT");
           OutputSerial.println("UNARMED_DROP_ATTEMPT");  
+          downlinkData = true;
+          strcat(downlinkMessage2,"NOT_ARMED");
         }
-    }else if(strstr((char*)rxBuf,"test")){
+    }else if(strstr((char*)rxBuf,"test"))
+    {
         OutputSerial.println("TEST_SUCCESS");
         logprintln("TEST_PASS");
         downlinkData = true;
-        strcat(downlinkMessage2,"pass");
-    }else if(strstr((char*)rxBuf,"setrate")){ //Change SBD message frequency
+        strcat(downlinkMessage2,"test");
+        
+    }else if(strstr((char*)rxBuf,"setrate")) //Change SBD message frequency
+    {
         if(strstr((char*)rxBuf,"fast")){      //For testing / accurate drops
           OutputSerial.println("SET_RATE_FAST");
           logprintln("SET_RATE_FAST");
@@ -46,17 +63,34 @@ void uplink(){
           strcat(downlinkMessage2,",rS");
         }
     }
-    if(strstr((char*)rxBuf,"xbeetest")){
+    if(strstr((char*)rxBuf,"xbeetest")){ //Sends test message to ground XBee
         OutputSerial.println("PingXbee");
         logprintln("PingXbee");
         String("TestCommand").getBytes(xbeeSendBuf,xbeeSendBufSize);
         xbeeSend(GroundSL,xbeeSendBuf);
     }
-    if(strstr((char*)rxBuf,"HELIOS")){
-      OutputSerial.println("HELIOS");
-      logprintln("HELIOS");
+    /**
+    if(strstr((char*)rxBuf,"pingMars")){
+        OutputSerial.println("pingMars");
+        logprintln("pingMars");
+        String("TestCommand").getBytes(xbeeSendBuf,xbeeSendBufSize);
+        xbeeSend(BlueSL,xbeeSendBuf);
+    }
+    */
+    if(strstr((char*)rxBuf,"MARS")){ //MARS passthrough
+      OutputSerial.println("MARS");
+      logprintln("MARS");
       strcat((char*)xbeeSendBuf,(char*)rxBuf);
-      xbeeSend(HeliosSL,xbeeSendBuf);
+      xbeeSend(BlueSL,xbeeSendBuf);
+      downlinkData = true;
+      strcat(downlinkMessage2,"conf");
+    }
+    
+    if(strstr((char*)rxBuf,"GND")){ //Ground passthrough
+      OutputSerial.println("GND");
+      logprintln("GND");
+      strcat((char*)xbeeSendBuf,(char*)rxBuf);
+      xbeeSend(GroundSL,xbeeSendBuf);
       downlinkData = true;
       strcat(downlinkMessage2,"conf");
     }

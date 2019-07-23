@@ -28,10 +28,9 @@ uint8_t xbeeSendBuf[xbeeSendBufSize];
 void setup() {
   Serial.begin(115200);
   xbeeSerial.begin(38400);
-  delay(500);
+  delay(1000);
   xbee.setSerial(xbeeSerial); //Sets which serial the xbee object listens to
-  Serial.println("Startup");
-  Serial.println("Enter Message Target (1 BITS, 2 Mars, 3 Tardis)");
+  startPrompt();
 }
 
 void loop() {
@@ -77,6 +76,21 @@ void loop() {
           xbeeSend(WireSL,xbeeSendBuf);
         }
       }
+      else if(pick=='r') //Clear the terminal
+      {
+        Serial.write(27);
+        Serial.print("[2J");
+        Serial.write(27);
+        Serial.print("[H");
+        startPrompt();
+      }else if(pick=='g') //Clear the terminal
+      {
+        Serial.write(27);
+        Serial.print("[5S");
+        Serial.write(27);
+        Serial.print("[H");
+        startPrompt();
+      }
   }
   
   
@@ -88,22 +102,24 @@ bool xbeeSend(uint32_t TargetSL,uint8_t* payload){
   ZBTxRequest zbTx = ZBTxRequest(TargetAddress, payload, xbeeSendBufSize); //Assembles Packet
   xbee.send(zbTx);                                                  //Sends packet
   memset(xbeeSendBuf, 0, xbeeSendBufSize);                          //Nukes buffer
-  if (xbee.readPacket(50)) {                                       //Checks Reception
+  if (xbee.readPacket(10)) {                                       //Checks Reception
     if (xbee.getResponse().getApiId() == ZB_TX_STATUS_RESPONSE) {   //If rec
       xbee.getResponse().getZBTxStatusResponse(txStatus);
       if (txStatus.getDeliveryStatus() == SUCCESS) {                //If positive transmit response
         Serial.println("SuccessfulTransmit");
-        Serial.println("Enter Message Target (1 BITS, 2 MARS, 3 TARDIS)");
+        startPrompt();
         return true;
       } else {
         Serial.println("TxFail");
-        Serial.println("Enter Message Target (1 BITS, 2 MARS, 3 TARDIS)");
+        startPrompt();
         return false;
       } 
     }
   } else if (xbee.getResponse().isError()) { //Stil have yet to see this trigger, might be broken...
     Serial.print("Error reading packet.  Error code: ");
     Serial.println(xbee.getResponse().getErrorCode());
+  } else {
+    Serial.println("Send Failure, check that remote XBee is powered on");  
   }
   return false;
 }
@@ -135,23 +151,30 @@ void xbeeRead(){
       }
     }
 }
+void startPrompt(){
+  Serial.println("XBee Ground Station Box:");
+  Serial.println("Enter Message Target (1 BITS, 2 Mars, 3 Tardis)");
+}
 
 void processBitsMessage(){ //Just print things to the monitor
   Serial.println("RecFromBits");
   Serial.write(xbeeRecBuf,xbeeRecBufSize);
-  Serial.println("");
+  Serial.println();
+  startPrompt();
 }
 
 void processMarsMessage(){ //Just print things to the monitor
   Serial.println("RecFromMars");
   Serial.write(xbeeRecBuf,xbeeRecBufSize);
-  Serial.println("");
+  Serial.println();
+  startPrompt();
 }
 
 void processTardisMessage(){ //Just print things to the monitor
   Serial.println("RecFromTardis");
   Serial.write(xbeeRecBuf,xbeeRecBufSize);
-  Serial.println("");
+  Serial.println();
+  startPrompt();
 }
 /**
 void processGroundMessage(){ //But THIS IS THE GROUND

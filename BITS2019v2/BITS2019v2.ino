@@ -25,10 +25,10 @@ const bool USEGPS = true;
 #define SBD_BAUD 19200
 
 //Xbee Stuff
-const uint32_t BitsSL = 0x417B4A3B;
-const uint32_t GroundSL = 0x417B4A36;
 const uint32_t HeliosSL = 0x417B4A3A;
-const uint32_t UniSH = 0x0013A200;
+const uint32_t BitsSL = 0x417B4A3B;   //BITS   (white)Specific to the XBee on Bits (the Serial Low address value)
+const uint32_t GroundSL = 0x417B4A36; //GndStn (u.fl)
+const uint32_t UniSH = 0x0013A200;//Common across any and all XBees
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
 
@@ -65,7 +65,7 @@ const String eventLogName = "EVENT.LOG";//Events Iridium/XBee
 const String rxLogName =    "RX.LOG";   //Iridium Uplinks   (toBalloon)
 const String txLogName =    "TX.LOG";   //Iridium Downlinks (toGround)
 
-const int chipSelect = 4; // Pin for SPI
+const int chipSelect = 3; // Pin for SPI
 
 unsigned long startTime; // The start time of the program
 unsigned long lastMillisOfMessage = 0;
@@ -185,6 +185,7 @@ String gpsPacket;
 if(USEGPS){
   OutputSerial.println("TryingGPS");
 //GPS LOCK INIT
+    /**
     while((gpsInfo.GPSAlt<=0)||(gpsInfo.GPSAlt>100000))
     {
       delay(500);
@@ -195,7 +196,7 @@ if(USEGPS){
         break;
         }
       }
-    }
+    }*/
     gpsPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
     txLogFile.println(gpsPacket);
     logprintln("GotLock");

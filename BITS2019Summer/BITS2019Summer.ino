@@ -1,6 +1,7 @@
 //UMD Nearspace Iridium Tracking Payload (BITS) {Balloon Iridium Tracking (or is it Telemetry?) System and killer of link)
 //Written by Jonathan Molter and Luke Renegar
 //Uses an Iridium 9603 SBD Modem for effective unlimited range, without the need for our own RF blackmagics
+//This software is specifically written with the bits2 board revisision
 
 #include <XBee.h> //If using 900HP's this must be the custom cpp (or really any post gen2 XBees)
 #include <IridiumSBD.h>
@@ -16,20 +17,21 @@
 #define DIAGNOSTICS false // Change this to see diagnostics
 const bool USEGPS = true;
 #define SLEEP_PIN_NO 5
-#define SBD_RX_BUFFER_SIZE 270 // Max size of an SBD message
+#define SBD_RX_BUFFER_SIZE 250 // Max size of an SBD message
 #define maxPacketSize 128
-#define downlinkMessageSize 98
+#define downlinkMessageSize 100
 
 //Setting default datarates
 #define GPS_BAUD 9600
 #define SBD_BAUD 19200
 
 //Xbee Stuff
-const uint32_t BitsSL = 0x417B4A3B;
-const uint32_t GroundSL = 0x417B4A36;
-const uint32_t HeliosSL = 0x417B4A3A;
-const uint32_t PackSL = 0x419091AC;
-const uint32_t UniSH = 0x0013A200;
+const uint32_t BitsSL = 0x417B4A3B;   //BITS   (white)Specific to the XBee on Bits (the Serial Low address value)
+const uint32_t GroundSL = 0x417B4A36; //GndStn (u.fl)
+const uint32_t BlueSL = 0x417B4A3A;   //Mars   (blue)
+const uint32_t WireSL = 0x419091AC;   //Tardis (wire antenna)
+const uint32_t UniSH = 0x0013A200;//Common across any and all XBees
+
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
 
@@ -66,7 +68,7 @@ const String eventLogName = "EVENT.LOG";//Events Iridium/XBee
 const String rxLogName =    "RX.LOG";   //Iridium Uplinks   (toBalloon)
 const String txLogName =    "TX.LOG";   //Iridium Downlinks (toGround)
 
-const int chipSelect = 3; // Pin for SPI //whoops
+const int chipSelect = 3; // Pin for SPI
 
 unsigned long startTime; // The start time of the program
 unsigned long lastMillisOfMessage = 0;
@@ -77,12 +79,12 @@ bool sendingMessages = true; // Whether or not the device is sending messages; b
 uint8_t rxBuf[49];//RX BUFFER
 uint8_t sbd_rx_buf[SBD_RX_BUFFER_SIZE];
 
-char downlinkMessage2[downlinkMessageSize] = {};
+char downlinkMessage2[downlinkMessageSize];
 bool downlinkData;
 
 int sbd_csq;
 
-int arm_status;//armed when = 42
+int arm_status = 42;//armed when = 42
 
 // Declare the IridiumSBD object
 IridiumSBD modem(IridiumSerial);
@@ -105,7 +107,7 @@ void setup()
 {
   Serial.begin(9600);
   delay(5);
-  Serial.println("BITS2019v2");
+  Serial.println("BITS2019SUM");
   gpsserial.begin(9600);
   GPSINIT();
   gpsserial.end();
@@ -185,12 +187,12 @@ String gpsPacket;
 
 if(USEGPS){
   OutputSerial.println("TryingGPS");
-//GPS LOCK INIT
-    /**
+
+  //GPS LOCK INIT
     while((gpsInfo.GPSAlt<=0)||(gpsInfo.GPSAlt>100000))
     {
-      delay(500);
-      output();
+      //delay(500);
+      //output();
       while (gpsserial.available()){
           if (gps.encode(gpsserial.read())){
           gpsInfo = getGPS();
@@ -198,7 +200,7 @@ if(USEGPS){
         }
       }
     }
-    */
+    
     gpsPacket = String(gpsInfo.GPSTime)+","+String(gpsInfo.GPSLat,4)+","+String(gpsInfo.GPSLon,4)+","+String(gpsInfo.GPSAlt);
     txLogFile.println(gpsPacket);
     logprintln("GotLock");
@@ -258,13 +260,16 @@ void loop()
 //Transmit Via Iridium
   if ((sbd_csq > 0 && (millis() - lastMillisOfMessage) > messageTimeInterval) && (millis() < shutdownTimeInterval) && sendingMessages) {
 
-    //uint32_t gps_time = gpsInfo.GPSTime; Delete
     size_t rx_buf_size = sizeof(sbd_rx_buf); //TODO
-    
+
+    //Assesmble the packet to be sent to the ground
     char Packet2[maxPacketSize];
     snprintf(Packet2,maxPacketSize,"%06d,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt); //Build the packet
     if(downlinkData){ //If there is stuff to downlink than do
-      strncat(Packet2,downlinkMessage2,maxPacketSize - strlen(Packet2) - 1); // Add downlink packet to main gps packet
+      logprint("DownAttempt: ");
+      logprintln(downlinkMessage2);
+      strncat(Packet2,downlinkMessage2,(maxPacketSize - strlen(Packet2) - 1)); // This should work
+      //strcat(Packet2,downlinkMessage2);
       downlinkData = false;
       memset(downlinkMessage2, 0, downlinkMessageSize); //Clear downlink message
     }    
@@ -273,8 +278,9 @@ void loop()
     OutputSerial.println("Loop Sending");
     txLogFile.println(Packet2);
     txLogFile.flush();
-    
-    uint8_t sbd_err = modem.sendReceiveSBDText(Packet2,rxBuf,rx_buf_size); //SEND/RECEIVE, return status
+
+    //SEND/RECEIVE, return status
+    uint8_t sbd_err = modem.sendReceiveSBDText(Packet2,rxBuf,rx_buf_size); 
 
     logprint("SBD send receive completed with return code: ");
     logprintln(sbd_err); // 0 is good

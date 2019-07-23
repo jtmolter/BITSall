@@ -31,7 +31,7 @@ void xbeeRead(){
         logprintln32(incominglsb);
         if(rx.getPacketLength()>=xbeeRecBufSize){
           logprint("Oversized Message: ");
-          logprintln(rx.getPacketLength());
+          //logprintln(rx.getPacketLength());
         }
         memset(xbeeRecBuf, 0, xbeeRecBufSize); // Clears old buffer
         memcpy(xbeeRecBuf,rx.getData(),rx.getPacketLength());
@@ -71,7 +71,7 @@ void processGroundMessage(){
       String("TGgndReq").getBytes(xbeeSendBuf,xbeeSendBufSize);
       xbeeSend(GroundSL,xbeeSendBuf);
       downlinkData = true;
-      //strcat(downlinkMessage2,(char*)xbeeRecBuf);
-      strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
+      strcat(downlinkMessage2,(char*)xbeeRecBuf);
+      //strncat(downlinkMessage2,(char*)xbeeRecBuf,downlinkMessageSize - strlen(downlinkMessage2) - 1);
   }
 }
