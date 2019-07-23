@@ -294,7 +294,7 @@ void loop()
  
     for (int k = 0; k < rx_buf_size; k++)//Prints RX characters to SD file
     {
-      rxLogFile.print(rxBuf[k]);
+      rxLogFile.write(rxBuf[k]);
       rxBuf[k] = 0;
       delay(1);
     }

@@ -26,8 +26,10 @@ void pingBlink(){
   {
     delay(250);
     digitalWrite(13, HIGH);
+    digitalWrite(5, HIGH);
     delay(250);
     digitalWrite(13, LOW);
+    digitalWrite(5, LOW);
   }
 }
 
