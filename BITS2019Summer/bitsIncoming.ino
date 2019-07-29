@@ -1,4 +1,4 @@
-//Everything related from ground to BITS commands
+// Everything related from ground to BITS commands
 void uplink(){
     //---------------------------------------------ARMING SECTION -------------------------------------
     if(strstr((char*)rxBuf,"disarm"))
@@ -24,7 +24,7 @@ void uplink(){
     }else if(strstr((char*)rxBuf,"drop"))
     {
         //pingBlink();
-        if(arm_status==42){
+        if(arm_status == 42){
           OutputSerial.println("open");
           logprintln("DROP");
           String("open").getBytes(xbeeSendBuf,xbeeSendBufSize);

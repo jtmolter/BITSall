@@ -17,7 +17,7 @@
 #define DIAGNOSTICS false // Change this to see diagnostics
 const bool USEGPS = true;
 #define SLEEP_PIN_NO 5
-#define SBD_RX_BUFFER_SIZE 250 // Max size of an SBD message
+#define SBD_RX_BUFFER_SIZE 100 // Max size of an SBD message
 #define maxPacketSize 128
 #define downlinkMessageSize 100
 
@@ -133,6 +133,10 @@ void setup()
   logprintln("INIT_LOG_LOG");
 
   memset(sbd_rx_buf, 0, SBD_RX_BUFFER_SIZE);
+
+  String("Init").getBytes(xbeeSendBuf,xbeeSendBufSize);
+  xbeeSend(GroundSL,xbeeSendBuf);
+  
   int err;
 
 #ifdef SBD  // Begin satellite modem operation
@@ -231,6 +235,9 @@ if(USEGPS){
     logprintln("Success, sent = "+String(sbd_buf));
   }
 #endif
+
+        String("EnteringLoop").getBytes(xbeeSendBuf,xbeeSendBufSize);
+        xbeeSend(GroundSL,xbeeSendBuf);
 }
 
 void loop()
@@ -294,7 +301,7 @@ void loop()
  
     for (int k = 0; k < rx_buf_size; k++)//Prints RX characters to SD file
     {
-      rxLogFile.write(rxBuf[k]);
+      rxLogFile.write(rxBuf[k]); //Trying write instead of print, shoud fix garbage data
       rxBuf[k] = 0;
       delay(1);
     }
