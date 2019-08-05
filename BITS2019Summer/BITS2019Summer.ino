@@ -404,7 +404,7 @@ void LogPacket(){
     strncpy(sec, &exactTime[4], 2);sec[2] = '\0';
     snprintf(exactTime,9,"%s:%s:%s",hour,min,sec);
     
-    snprintf(gpsLogPacket2,35,"%06d,%4.4f,%4.4f,%u",exactTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt);
+    snprintf(gpsLogPacket2,35,"%s,%4.4f,%4.4f,%u",exactTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt); //Fix Timestep
     gpsLogFile.println(gpsLogPacket2);
     
     gpsLogFile.flush();
