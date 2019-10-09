@@ -1,0 +1,49 @@
+INIT_LOG_LOG
+INIT_LOG_LOG
+GotLock
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+Success, sent = 13823,38.9931,-76.9392,29
+14141,38.9931,-76.9392,20TG-Helios is onTG-Helios is onLoop Sending
+SBD send receive completed with return code: 0
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+14247,38.9931,-76.9392,22TG-Started timer: 1:42:12Loop Sending
+SBD send receive completed with return code: 0
+14450,38.9931,-76.9392,25Loop Sending
+SBD send receive completed with return code: 0
+HELIOS
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+14606,38.9932,-76.9392,30confTG-Valve commanded open for 18000Loop Sending
+SBD send receive completed with return code: 0
+HELIOS
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+14709,38.9932,-76.9392,28confTG-Confirm Helios aborted ventinLoop Sending
+SBD send receive completed with return code: 0
+15008,38.9931,-76.9392,25Loop Sending
+SBD send receive completed with return code: 0
+15115,38.9931,-76.9392,34Loop Sending
+SBD send receive completed with return code: 0
+HELIOS
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+15350,38.9932,-76.9392,29confTG-Cutdown command heated for 120Loop Sending
+SBD send receive completed with return code: 0
+HELIOS
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+15501,38.9932,-76.9392,30confTG-Alt: 31 m, Asc-Vel: 0.00 m/Loop Sending
+SBD send receive completed with return code: 0
+15610,38.9932,-76.9392,27Loop Sending
+SBD send receive completed with return code: 0

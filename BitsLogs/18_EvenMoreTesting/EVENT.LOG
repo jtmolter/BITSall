@@ -1,0 +1,8 @@
+INIT_LOG_LOG
+GotLock
+Success, sent = 221508,38.9931,-76.9391,15
+221528,38.9930,-76.9391,5Loop Sending
+SBD send receive completed with return code: 7
+221842,38.9930,-76.9392,28Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_NORM

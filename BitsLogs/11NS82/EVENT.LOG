@@ -1,0 +1,122 @@
+INIT_LOG_LOG
+GotLock
+Success, sent = 125445,39.2146,-78.1842,288
+125504,39.2146,-78.1842,291Loop Sending
+SBD send receive completed with return code: 0
+125715,39.2146,-78.1842,288Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_NORM
+130309,39.2147,-78.1842,287Loop Sending
+SBD send receive completed with return code: 0
+CSQ error code = 3
+130826,39.2147,-78.1842,291Loop Sending
+SBD send receive completed with return code: 0
+CSQ error code = 3
+131336,39.2146,-78.1842,290Loop Sending
+SBD send receive completed with return code: 0
+131909,39.2146,-78.1843,283Loop Sending
+SBD send receive completed with return code: 0
+132417,39.2146,-78.1843,282Loop Sending
+SBD send receive completed with return code: 0
+132936,39.2125,-78.1752,1467Loop Sending
+SBD send receive completed with return code: 0
+133557,39.2164,-78.1173,3409Loop Sending
+SBD send receive completed with return code: 0
+134102,39.2579,-78.0526,5021Loop Sending
+SBD send receive completed with return code: 0
+Payload Armed
+134755,39.2969,-77.9549,7281Loop Sending
+SBD send receive completed with return code: 0
+135314,39.3377,-77.8334,9038Loop Sending
+SBD send receive completed with return code: 0
+DROP
+135856,39.3948,-77.6905,11097Loop Sending
+SBD send receive completed with return code: 3
+140434,39.4313,-77.5257,12979Loop Sending
+SBD send receive completed with return code: 0
+140943,39.4840,-77.3787,14643Loop Sending
+SBD send receive completed with return code: 0
+TEST_PASS
+141504,39.5328,-77.2537,16123,GOLoop Sending
+SBD send receive completed with return code: 0
+142105,39.5462,-77.1600,18098Loop Sending
+SBD send receive completed with return code: 3
+142702,39.5865,-77.1050,19786Loop Sending
+SBD send receive completed with return code: 0
+143351,39.6004,-77.0624,21801Loop Sending
+SBD send receive completed with return code: 0
+143947,39.6091,-77.0502,23634Loop Sending
+SBD send receive completed with return code: 3
+CSQ error code = 3
+CSQ error code = 3
+144518,39.6138,-77.0420,25362Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_FAST
+144953,39.6180,-77.0391,26826Loop Sending
+SBD send receive completed with return code: 0
+145148,39.6191,-77.0392,27476Loop Sending
+SBD send receive completed with return code: 0
+145306,39.6205,-77.0402,27917Loop Sending
+SBD send receive completed with return code: 0
+145638,39.6285,-77.0375,29050Loop Sending
+SBD send receive completed with return code: 0
+145834,39.6288,-77.0360,29663Loop Sending
+SBD send receive completed with return code: 0
+150258,39.6304,-77.0269,31070Loop Sending
+SBD send receive completed with return code: 0
+150413,39.6289,-77.0249,31458Loop Sending
+SBD send receive completed with return code: 0
+150521,39.6290,-77.0250,31813Loop Sending
+SBD send receive completed with return code: 0
+150625,39.6301,-77.0249,30913Loop Sending
+SBD send receive completed with return code: 0
+150749,39.6315,-77.0244,26418Loop Sending
+SBD send receive completed with return code: 0
+150902,39.6324,-77.0228,23549Loop Sending
+SBD send receive completed with return code: 0
+151014,39.6348,-77.0194,21291Loop Sending
+SBD send receive completed with return code: 3
+CSQ error code = 3
+151327,39.6471,-76.9903,16888Loop Sending
+SBD send receive completed with return code: 0
+151619,39.6670,-76.9189,14061Loop Sending
+SBD send receive completed with return code: 0
+151750,39.6835,-76.8807,12876Loop Sending
+SBD send receive completed with return code: 7
+152440,39.7354,-76.7037,8637Loop Sending
+SBD send receive completed with return code: 0
+152814,39.7635,-76.6253,6758Loop Sending
+SBD send receive completed with return code: 0
+152930,39.7723,-76.6048,6166Loop Sending
+SBD send receive completed with return code: 0
+153052,39.7767,-76.5860,5514Loop Sending
+SBD send receive completed with return code: 0
+153303,39.7873,-76.5574,4497Loop Sending
+SBD send receive completed with return code: 0
+153459,39.8043,-76.5282,3659Loop Sending
+SBD send receive completed with return code: 0
+153608,39.8123,-76.5111,3202Loop Sending
+SBD send receive completed with return code: 0
+153718,39.8165,-76.4951,2736Loop Sending
+SBD send receive completed with return code: 0
+153843,39.8150,-76.4837,2185Loop Sending
+SBD send receive completed with return code: 0
+154046,39.8165,-76.4747,1382Loop Sending
+SBD send receive completed with return code: 0
+154331,39.8172,-76.4696,354Loop Sending
+SBD send receive completed with return code: 0
+154534,39.8172,-76.4681,179Loop Sending
+SBD send receive completed with return code: 0
+154715,39.8172,-76.4681,182Loop Sending
+SBD send receive completed with return code: 0
+154913,39.8172,-76.4681,187Loop Sending
+SBD send receive completed with return code: 0
+155023,39.8172,-76.4681,185Loop Sending
+SBD send receive completed with return code: 0
+155137,39.8172,-76.4681,187Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_SLOW
+160731,39.8173,-76.4681,181Loop Sending
+SBD send receive completed with return code: 0
+162241,39.8173,-76.4681,179Loop Sending
+SBD send receive completed with return code: 0

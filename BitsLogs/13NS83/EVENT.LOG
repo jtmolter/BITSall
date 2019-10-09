@@ -1,0 +1,100 @@
+INIT_LOG_LOG
+INIT_LOG_LOG
+GotLock
+Success, sent = 124859,38.9097,-78.2047,173
+124954,38.9096,-78.2047,176Loop Sending
+SBD send receive completed with return code: 0
+125104,38.9096,-78.2047,177Loop Sending
+SBD send receive completed with return code: 0
+HELIOS
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+125214,38.9096,-78.2047,177confTG-Alt: 177 m, Asc-Vel: 0.00 m/Loop Sending
+SBD send receive completed with return code: 0
+125323,38.9096,-78.2047,176Loop Sending
+SBD send receive completed with return code: 0
+125438,38.9096,-78.2047,179Loop Sending
+SBD send receive completed with return code: 0
+125542,38.9096,-78.2047,181Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_NORM
+130151,38.9096,-78.2047,174Loop Sending
+SBD send receive completed with return code: 0
+130654,38.9096,-78.2047,176Loop Sending
+SBD send receive completed with return code: 0
+131308,38.9097,-78.2047,174Loop Sending
+SBD send receive completed with return code: 0
+131816,38.9097,-78.2047,177Loop Sending
+SBD send receive completed with return code: 0
+132417,38.9097,-78.2047,177Loop Sending
+SBD send receive completed with return code: 0
+132922,38.9097,-78.2047,178Loop Sending
+SBD send receive completed with return code: 0
+133458,38.9097,-78.2047,173Loop Sending
+SBD send receive completed with return code: 0
+134010,38.9097,-78.2047,179Loop Sending
+SBD send receive completed with return code: 0
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+134529,38.9057,-78.1989,1057TG-Started timer: 13:41:32Loop Sending
+SBD send receive completed with return code: 0
+135054,38.8998,-78.1920,2810Loop Sending
+SBD send receive completed with return code: 0
+135651,38.9233,-78.1726,4859Loop Sending
+SBD send receive completed with return code: 0
+140346,39.0208,-78.1247,7305Loop Sending
+SBD send receive completed with return code: 0
+140908,39.1071,-78.0957,9407Loop Sending
+SBD send receive completed with return code: 0
+141427,39.1667,-78.0790,11508Loop Sending
+SBD send receive completed with return code: 0
+142021,39.2194,-78.0507,13903Loop Sending
+SBD send receive completed with return code: 0
+142637,39.2694,-78.0239,16282Loop Sending
+SBD send receive completed with return code: 0
+143213,39.3107,-78.0030,18317Loop Sending
+SBD send receive completed with return code: 0
+143730,39.3328,-77.9989,20292Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_FAST
+144102,39.3424,-77.9987,21644Loop Sending
+SBD send receive completed with return code: 0
+144409,39.3464,-78.0113,22744Loop Sending
+SBD send receive completed with return code: 7
+145206,39.3492,-78.0193,25578Loop Sending
+SBD send receive completed with return code: 0
+HELIOS
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+145318,39.3496,-78.0206,26009confTG-Cutdown command heated for 180Loop Sending
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+SBD send receive completed with return code: 0
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios
+IncPckFrom 417B4A3A
+RecHelios
+TGhelios

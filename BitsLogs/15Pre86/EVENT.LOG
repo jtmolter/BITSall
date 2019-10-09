@@ -1,0 +1,16 @@
+INIT_LOG_LOG
+GotLock
+Success, sent = 2,2.0000,2.0000,-1
+2,2.0000,2.0000,4294967295Loop Sending
+SBD send receive completed with return code: 0
+2,2.0000,2.0000,4294967295Loop Sending
+SBD send receive completed with return code: 0
+113848,39.5282,-76.9913,269Loop Sending
+SBD send receive completed with return code: 0
+113957,39.5282,-76.9913,276Loop Sending
+SBD send receive completed with return code: 0
+114205,39.5282,-76.9913,265Loop Sending
+SBD send receive completed with return code: 0
+HELIOS
+IncPckFrom 417B4A3A
+RecHelios

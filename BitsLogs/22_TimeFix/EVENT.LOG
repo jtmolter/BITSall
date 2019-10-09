@@ -1,0 +1,14 @@
+INIT_LOG_LOG
+INIT_LOG_LOG
+INIT_LOG_LOG
+INIT_LOG_LOG
+GotLock
+Success, sent = 202148,38.9931,-76.9392,30
+202200,38.9932,-76.9392,24Loop Sending
+SBD send receive completed with return code: 0
+202328,38.9931,-76.9392,35Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_NORM
+DownAttempt: ,rN
+202937,38.9931,-76.9392,40,rNLoop Sending
+SBD send receive completed with return code: 0

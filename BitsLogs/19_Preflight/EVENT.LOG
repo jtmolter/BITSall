@@ -1,0 +1,43 @@
+INIT_LOG_LOG
+GotLock
+Success, sent = 24842,38.9800,-76.9370,40
+025022,38.9799,-76.9371,20Loop Sending
+SBD send receive completed with return code: 0
+025128,38.9800,-76.9371,29Loop Sending
+SBD send receive completed with return code: 0
+025932,38.9800,-76.9371,28Loop Sending
+SBD send receive completed with return code: 7
+030359,38.9799,-76.9372,35Loop Sending
+INIT_LOG_LOG
+GotLock
+sendSBDText failed: error 7
+Try again with a better view of the sky.
+031651,38.9799,-76.9372,28Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_NORM
+INIT_LOG_LOG
+GotLock
+Success, sent = 31820,38.9799,-76.9370,30
+031831,38.9799,-76.9371,22Loop Sending
+SBD send receive completed with return code: 0
+031943,38.9799,-76.9372,24Loop Sending
+SBD send receive completed with return code: 7
+032452,38.9799,-76.9372,31Loop Sending
+SBD send receive completed with return code: 0
+INIT_LOG_LOG
+GotLock
+Success, sent = 113826,39.3588,-77.5485,173
+113923,39.3587,-77.5485,159Loop Sending
+SBD send receive completed with return code: 0
+114029,39.3587,-77.5484,171Loop Sending
+SBD send receive completed with return code: 0
+114234,39.3588,-77.5484,166Loop Sending
+SBD send receive completed with return code: 0
+114633,39.3588,-77.5484,165Loop Sending
+SBD send receive completed with return code: 0
+SET_RATE_NORM
+DownAttempt: ,rN
+115147,39.3588,-77.5484,164,rNLoop Sending
+SBD send receive completed with return code: 7
+115904,39.3587,-77.5484,163Loop Sending
+SBD send receive completed with return code: 0

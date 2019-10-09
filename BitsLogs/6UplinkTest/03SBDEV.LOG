@@ -1,0 +1,8 @@
+Success, sent = 23:42:5,38.99307,-76.93920,21.6
+23:43:21,38.99305,-76.93923,24.6Loop Sending
+SBD send receive completed with return code: 0
+23:45:40,38.99306,-76.93922,26.0Loop Sending
+SBD send receive completed with return code: 0
+TEST_PASS
+23:48:9,38.99308,-76.93916,30.6Loop Sending
+SBD send receive completed with return code: 0

@@ -1,0 +1,18 @@
+INIT_LOG_LOG
+INIT_LOG_LOG
+GotLock
+INIT_LOG_LOG
+GotLock
+Success, sent = 231330,38.9800,-76.9371,42
+231516,38.9800,-76.9370,52Loop Sending
+SBD send receive completed with return code: 0
+231619,38.9800,-76.9370,54Loop Sending
+SBD send receive completed with return code: 7
+232214,38.9800,-76.9370,52Loop Sending
+SBD send receive completed with return code: 0
+GNDPASS
+DownAttempt: ,GNDPass
+232411,38.9800,-76.9369,55,GNDPassLoop Sending
+SBD send receive completed with return code: 0
+232527,38.9800,-76.9369,47Loop Sending
+SBD send receive completed with return code: 7
