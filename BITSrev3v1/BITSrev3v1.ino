@@ -1,40 +1,45 @@
-//UMD Nearspace Iridium Tracking Payload (BITS) {Balloon Iridium Tracking (or is it Telemetry?) System and killer of link)
+//UMD Nearspace Iridium Tracking Payload (BITS) {Balloon Iridium Tracking System)
 //Written by Jonathan Molter and Luke Renegar
-//Uses an Iridium 9603 SBD Modem for effective unlimited range, without the need for our own RF blackmagics
-//This software is specifically written with the bits2 board revisision
+//Uses an Iridium 9603 SBD Modem for effective unlimited range, without the need for our own RF blackmagics*
+//This software is specifically written with the bits3 board revisision
 
 #include <XBee.h> //If using 900HP's this must be the custom cpp (or really any post gen2 XBees)
 #include <IridiumSBD.h>
 #include <SD.h>
 #include <TinyGPS.h>
 
-//Serial Ports (sketch requires 4 {Wellll technically 3 + USB})
-#define OutputSerial Serial
-#define IridiumSerial Serial1
-#define XBeeSerial Serial2
-#define gpsserial Serial3
+//Serial Ports (sketch requires 4 {Wellll technically 3 + DEBUG})
+#define OutputSerial Serial     //USB debug
+#define IridiumSerial Serial1   //Iridium 9603
+#define XBeeSerial Serial2      //XBee
+#define gpsserial Serial3       //GPS
+//Pins
+#define SLEEP_PIN_NO 5    // Iridium Sleep Pin
+#define RING_PIN_NO 23    // Iridium Ring Alert Pin
+#define chipSelect 6      // Pin for SPI
+#define greenLED 2        // Green Status LED
+#define redLED 3          // Red Status LED
+#define GPS_ON 4
 
 #define DIAGNOSTICS false // Change this to see diagnostics
-const bool USEGPS = true;
-#define SLEEP_PIN_NO 5
-#define SBD_RX_BUFFER_SIZE 100 // Max size of an SBD message
-#define maxPacketSize 128
-#define downlinkMessageSize 100
+#define XBEE_DEBUG true
+const bool USEGPS = true; // Should be true 99% of the time
+bool sendingMessages = true; // Whether or not the device is sending messages; begins as true TODO
 
 //Setting default datarates
 #define GPS_BAUD 9600
 #define SBD_BAUD 19200
 
-//Xbee Stuff
-const uint32_t BitsSL = 0x417B4A3B;   //BITS   (white)Specific to the XBee on Bits (the Serial Low address value)
-const uint32_t GroundSL = 0x417B4A36; //GndStn (u.fl)
-const uint32_t BlueSL = 0x417B4A3A;   //Mars   (blue)
-const uint32_t WireSL = 0x419091AC;   //Tardis (wire antenna)
-const uint32_t UniSH = 0x0013A200;//Common across any and all XBees
+//XBee Addresses
+const uint32_t BitsSL = 0x417B4A3B;   //BITS (white)Specific to the XBee on Bits (the Serial Low address value)
+const uint32_t GroundSL = 0x417B4A36; //GroundStations (u.fl)
+const uint32_t BlueSL = 0x417B4A3A;   //Blue (Blue Tape)
+const uint32_t WireSL = 0x419091AC;   //Wire (wire antenna)
+const uint32_t UniSH = 0x0013A200;    //Common across any and all XBees
 
+//XBee object / global variables
 XBee xbee = XBee();
 XBeeResponse response = XBeeResponse();
-
 ZBTxStatusResponse txStatus = ZBTxStatusResponse();
 ZBRxResponse rx = ZBRxResponse();
 ModemStatusResponse msr = ModemStatusResponse();
@@ -43,52 +48,60 @@ const int xbeeSendBufSize = 34;
 uint8_t xbeeRecBuf[xbeeRecBufSize];
 uint8_t xbeeSendBuf[xbeeSendBufSize];
 
+//GPS data struct and object
 struct GPSdata{
-  float GPSLat=2;
-  float GPSLon=2;
-  unsigned long GPSTime=2;
+  float GPSLat=-1;
+  float GPSLon=-1;
+  unsigned long GPSTime=-1;
   long GPSAlt=-1;
   int GPSSats=-1;
 };
 TinyGPS gps;
 GPSdata gpsInfo;
 
-//Initializing Log Files
-File gpsLogFile;
-File rxLogFile;
-File txLogFile;
-
+//Interval definitions
 const long signalCheckInterval = 15000;
 unsigned long messageTimeInterval = 60000; // In milliseconds; 300000 is 5 minutes; defines how frequently the program sends messages, now changeable                                                                      
 const long shutdownTimeInterval = 14400000; // In milliseconds; 14400000 is 4 hours; defines after what period of time the program stops sending messages
 
-// LogFiles, Must be in form XXXXXXXX.log; no more than 8 'X' characters
+//Initializing Log Files; Must be in form XXXXXXXX.log; no more than 8 'X' characters
+File gpsLogFile;
+File rxLogFile;
+File txLogFile;
+
 const String gpsLogName =   "GPS.LOG";  //1 sec position/altitude updates
-const String eventLogName = "EVENT.LOG";//Events Iridium/XBee
+const String eventLogName = "EVENT.LOG";//Events Iridium/XBee (Special one thanks to Luke)
 const String rxLogName =    "RX.LOG";   //Iridium Uplinks   (toBalloon)
 const String txLogName =    "TX.LOG";   //Iridium Downlinks (toGround)
 
-const int chipSelect = 3; // Pin for SPI
 
-unsigned long startTime; // The start time of the program
+
+// Program Timing
+unsigned long startTime;
 unsigned long lastMillisOfMessage = 0;
 unsigned long lastSignalCheck = 0;
 unsigned long lastLog = 0;
 
-bool sendingMessages = true; // Whether or not the device is sending messages; begins as true TODO
-uint8_t rxBuf[49];//RX BUFFER
-uint8_t sbd_rx_buf[SBD_RX_BUFFER_SIZE];
+// Iridium Global Buffers
+//#define SBD_RX_BUFFER_SIZE 100 // Max size of an SBD message TODO(1) DELETE
+#define maxPacketSize 128		//Standard(GPS/TIME, etc.) + Message Data
+#define downlinkMessageSize 100 //Message Data
+#define RX_BUF_LENGTH 49		//Uplink Buffer Size
 
-char downlinkMessage2[downlinkMessageSize];
+uint8_t rxBuf[RX_BUF_LENGTH]; 			   //Uplink Buffer
+//uint8_t sbd_rx_buf[SBD_RX_BUFFER_SIZE];  //TODO(1) DELETE ?(what is this even doing...)
+char downlinkMessage2[downlinkMessageSize];//Downlink Buffer
 bool downlinkData;
 
-int sbd_csq;
+int sbd_csq; //Signal Qual
 
+// The best global
 int arm_status = 42;//armed when = 42
 
 // Declare the IridiumSBD object
 IridiumSBD modem(IridiumSerial);
 
+//Possible Iridium Error Codes
 #define ISBD_SUCCESS             0
 #define ISBD_ALREADY_AWAKE       1
 #define ISBD_SERIAL_FAILURE      2
@@ -107,11 +120,11 @@ void setup()
 {
   Serial.begin(9600);
   delay(5);
-  Serial.println("BITS2019SUM");
+  Serial.println("BITSrev3v1");
   gpsserial.begin(9600);
-  GPSINIT();
+  GPSINIT(); //Setup the GPS
   gpsserial.end();
-  gpsserial.begin(9600);//To get the GPS into Airborne mode
+  gpsserial.begin(GPS_BAUD);
   IridiumSerial.begin(SBD_BAUD);
   Serial2.begin(9600);
   xbee.setSerial(Serial2);
@@ -132,17 +145,17 @@ void setup()
   Serial.println("MadeLogs");
   logprintln("INIT_LOG_LOG");
 
-  memset(sbd_rx_buf, 0, SBD_RX_BUFFER_SIZE);
+  //memset(sbd_rx_buf, 0, SBD_RX_BUFFER_SIZE); //TODO(1) DELETE ?
 
-  String("Init").getBytes(xbeeSendBuf,xbeeSendBufSize);
-  xbeeSend(GroundSL,xbeeSendBuf);
+  //XBee Init Message to ground stations
+  String("Init").getBytes(xbeeSendBuf,xbeeSendBufSize);   //Convert "Init" 2 bytes, dump into Message buffer
+  xbeeSend(GroundSL,xbeeSendBuf);                         //(Target,Message)
   
-  int err;
-
+int err;
 #ifdef SBD  // Begin satellite modem operation
   OutputSerial.println("Starting modem...");
   err = modem.begin();
-  modem.useMSSTMWorkaround(false);//SUPER NF TESTTHIS TODO
+  modem.useMSSTMWorkaround(false);//SUPER NF TESTTHIS TODO(2)
   modem.adjustSendReceiveTimeout(120);
   if (err != ISBD_SUCCESS)
   {
@@ -193,7 +206,7 @@ if(USEGPS){
   OutputSerial.println("TryingGPS");
 
   //GPS LOCK INIT
-    while((gpsInfo.GPSAlt<=0)||(gpsInfo.GPSAlt>100000))
+    while((gpsInfo.GPSAlt<=0)||(gpsInfo.GPSAlt>100000)) //Outside of a reasonable range
     {
       //delay(500);
       //output();
@@ -215,6 +228,8 @@ if(USEGPS){
   gpsPacket = "test";
 }
 
+
+//Honestly consider canning this whole section, really not needed considering loop does the same thing
 #ifdef SBD
 // Send the message
   char sbd_buf[49];//TX BUFFER
@@ -242,7 +257,7 @@ if(USEGPS){
 
 void loop()
 {  
-  ISBDCallback();
+  ISBDCallback(); //During the Iridium retry protocol anything that still needs to happen needs to go in here
 
   xbeeRead();
   LogPacket();
@@ -265,20 +280,22 @@ void loop()
   }
 
 //Transmit Via Iridium
+  // If not currently transmitting, and at time, and transmitting messages ON, transmit
   if ((sbd_csq > 0 && (millis() - lastMillisOfMessage) > messageTimeInterval) && (millis() < shutdownTimeInterval) && sendingMessages) {
 
-    size_t rx_buf_size = sizeof(sbd_rx_buf); //TODO
+    size_t rx_buf_size = RX_BUF_LENGTH; //RECENT CHANGE via TODO(1)
 
-    //Assesmble the packet to be sent to the ground
+  //Assesmble the packet to be sent to the ground
     char Packet2[maxPacketSize];
     snprintf(Packet2,maxPacketSize,"%06d,%4.4f,%4.4f,%u",gpsInfo.GPSTime,gpsInfo.GPSLat,gpsInfo.GPSLon,gpsInfo.GPSAlt); //Build the packet
-    if(downlinkData){ //If there is stuff to downlink than do
+
+  //If there is stuff to downlink than do
+    if(downlinkData){ 
       logprint("DownAttempt: ");
       logprintln(downlinkMessage2);
-      strncat(Packet2,downlinkMessage2,(maxPacketSize - strlen(Packet2) - 1)); // This should work
-      //strcat(Packet2,downlinkMessage2);
+      strncat(Packet2,downlinkMessage2,(maxPacketSize - strlen(Packet2) - 1));  //Add data from downlinkMessage2 into Packet2, check for size
       downlinkData = false;
-      memset(downlinkMessage2, 0, downlinkMessageSize); //Clear downlink message
+      memset(downlinkMessage2, 0, downlinkMessageSize);                         //Clear downlink message
     }    
     
     logprint(Packet2);logprintln("Loop Sending");
@@ -286,8 +303,8 @@ void loop()
     txLogFile.println(Packet2);
     txLogFile.flush();
 
-    //SEND/RECEIVE, return status
-    uint8_t sbd_err = modem.sendReceiveSBDText(Packet2,rxBuf,rx_buf_size); 
+  //SEND/RECEIVE DATA, return status
+    uint8_t sbd_err = modem.sendReceiveSBDText(Packet2,rxBuf,rx_buf_size);  //Message, RecieveBuffer, SizeOfBuffer
 
     logprint("SBD send receive completed with return code: ");
     logprintln(sbd_err); // 0 is good
@@ -296,7 +313,7 @@ void loop()
     rxLogFile.print(String(gpsInfo.GPSTime)); //Log time of RX
     rxLogFile.print("\t");
     
-//Uplink
+  //Process Received Messages
     uplink(); //Run uplink message handling (bitsIncoming)
  
     for (int k = 0; k < rx_buf_size; k++)//Prints RX characters to SD file
@@ -411,3 +428,6 @@ void LogPacket(){
     lastLog=millis();
   }
 }
+
+//* This version actually hopes to leverage the power of proper link budget calculations to obtain XBee to ground comms
+//  without the need for Iridium

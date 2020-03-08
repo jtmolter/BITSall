@@ -19,9 +19,11 @@ const char hexList[] PROGMEM = {
 };
 
 void GPSINIT(){
-  //pinMode(6,OUTPUT); //GPS transistor pin
-  //digitalWrite(6,HIGH);
-  //delay(1000);
+  pinMode(GPS_ON,OUTPUT); //GPS transistor pin
+  pinMode(GPS_ON,HIGH);    //Turns off GPS (remember its a PMOS)
+  delay(500);
+  pinMode(GPS_ON,LOW);    //Turns on GPS
+  
 	for(int i = 0;i<sizeof(hexList);i++){
 		gpsserial.write(pgm_read_byte(hexList+i));
 		delay(10);
@@ -30,8 +32,6 @@ void GPSINIT(){
 
 GPSdata getGPS(){
   GPSdata gpsInfo;
-  //unsigned long chars; //TESTTHIS
-  //unsigned short sentences, failed;
   
     float GPSLat, GPSLon;
     int GPSSats;
@@ -51,6 +51,7 @@ GPSdata getGPS(){
   return gpsInfo;
 }
 
+// DEBUG PRINT METHOD
 void output(){
   String gpspacket;
   if(gpsInfo.GPSSats!=-1){
